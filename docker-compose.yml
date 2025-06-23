@@ -1,0 +1,53 @@
+#docker-compose run --rm parser
+
+services:
+  flask:
+    build: .
+    container_name: flask
+    ports:
+      - "5001:5000"
+    volumes:
+      - "/Volumes/Eduu/edy.chat:/app/media:ro"
+      - "./static:/app/static"
+    environment:
+      - MEDIA_FOLDER=/app/media
+    restart: always
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+      - "./static:/app/static"
+    ports:
+      - "80:80"
+    depends_on:
+      - flask
+      - photoprism
+    restart: always
+
+  photoprism:
+    image: photoprism/photoprism:latest
+    container_name: photoprism
+    restart: always
+    ports:
+      - "2342:2342"
+    environment:
+      PHOTOPRISM_ADMIN_PASSWORD: "changeme"
+      PHOTOPRISM_ORIGINALS_PATH: "/photoprism/originals"
+      PHOTOPRISM_DATABASE_DRIVER: "sqlite"
+      PHOTOPRISM_HTTP_COMPRESSION: "gzip"
+      PHOTOPRISM_UPLOAD_NSFW: "false"
+      PHOTOPRISM_DEBUG: "false"
+      PHOTOPRISM_START_SERVICES: "true"
+      PHOTOPRISM_WORKERS: "2"              # Set more if your CPU can handle it
+      PHOTOPRISM_THUMB_PATH: "thumbs"
+      PHOTOPRISM_THUMB_FILTER: "lanczos"
+      PHOTOPRISM_THUMB_SIZE: "2048"
+      PHOTOPRISM_THUMB_UNCACHED: "false"
+      PHOTOPRISM_AUTO_REINDEX: "true"
+      PHOTOPRISM_DETECT_NSFW: "true"
+
+    volumes:
+      - "/Volumes/Eduu/edy.chat:/photoprism/originals"
+      - "./photoprism/storage:/photoprism/storage"
