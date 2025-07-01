@@ -1,4 +1,4 @@
-#docker-compose run --rm parser
+#docker-compose up --build
 
 services:
   flask:
